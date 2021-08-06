@@ -26,7 +26,7 @@ const (
 )
 
 func getContext(cmd *cobra.Command) (*Context, error) {
-	c, err := loadConfig(true)
+	c, err := LoadConfig(true)
 	if err != nil {
 		return nil, err
 	}

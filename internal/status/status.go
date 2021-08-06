@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/armory/armory-cli/internal"
 	"github.com/armory/armory-cli/internal/deng"
+	"github.com/armory/armory-cli/internal/helpers"
 	"github.com/golang/protobuf/ptypes/any"
 	"github.com/juju/ansiterm"
 	"github.com/sirupsen/logrus"
@@ -87,7 +87,7 @@ func printStatus(w io.Writer, descriptor *deng.Descriptor) {
 	_, _ = fmt.Fprintf(wt, "Started By:\t%s\n", descriptor.InitiatedBy)
 	_, _ = fmt.Fprintf(wt, "Environment:\t%s (%s)\n", descriptor.Env.Account, descriptor.Env.Provider)
 	printKubernetesOptions(wt, descriptor.Env.GetKubernetes())
-	_, _ = fmt.Fprintf(wt, "Status:\t%s\n", cli.Status(descriptor.Status))
+	_, _ = fmt.Fprintf(wt, "Status:\t%s\n", helpers.Status(descriptor.Status))
 	_ = wt.Flush()
 
 	// Kubernetes state
@@ -100,7 +100,7 @@ func printEvents(w io.Writer, getter eventGetter) {
 
 	events, eventsErr := getter(context.TODO())
 	if eventsErr != nil {
-		_, _ = fmt.Fprintf(w, cli.AnsiFormat("Error obtaining events\n", cli.FgRed))
+		_, _ = fmt.Fprintf(w, helpers.AnsiFormat("Error obtaining events\n", helpers.FgRed))
 	} else {
 		for _, e := range events {
 			tm := "?"
@@ -132,7 +132,7 @@ func printKubernetesState(w io.Writer, state *any.Any) {
 		return
 	}
 	if len(d.Atomic) == 0 {
-		_, _ = fmt.Fprintf(w, cli.AnsiFormat("\nNo objects deployed\n", cli.Bold))
+		_, _ = fmt.Fprintf(w, helpers.AnsiFormat("\nNo objects deployed\n", helpers.Bold))
 		return
 	}
 
@@ -160,7 +160,7 @@ func Watch(ctx context.Context, w io.Writer, descriptor *deng.Descriptor, showEv
 		case <-timer.C:
 			// TODO don't ignore error
 			_ = wg.tick(ctx)
-			cli.Clear(w)
+			helpers.Clear(w)
 			printStatus(w, descriptor)
 			if showEvents {
 				printEvents(w, wg.getEvents)

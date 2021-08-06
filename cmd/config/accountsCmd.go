@@ -1,12 +1,14 @@
-package app
+package config
 
 import (
 	"context"
 	"fmt"
+	"github.com/armory/armory-cli/internal/config"
 	"github.com/armory/armory-cli/internal/deng"
+	"github.com/armory/armory-cli/internal/helpers"
+	"github.com/armory/armory-cli/internal/utils"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/juju/ansiterm"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"
 	"time"
@@ -17,26 +19,34 @@ const (
 	ParameterProvider = "provider"
 )
 
-func Execute(ctx context.Context, log *logrus.Logger, cmd *cobra.Command, client deng.DeploymentServiceClient, args []string) error {
-	if len(args) == 0 {
-		// Get all applications
-		return getAllApplications(ctx, log, cmd, client)
-	}
-	return nil
+var listAccountsCmd = &cobra.Command{
+	Use:   "accounts",
+	Short: "List available accounts",
+	RunE: executeListAccountsCmd,
 }
 
-func getAllApplications(ctx context.Context, log *logrus.Logger, cmd *cobra.Command, client deng.DeploymentServiceClient) error {
-	envName, err := cmd.Flags().GetString(ParameterAccount)
+func init() {
+	listAccountsCmd.Flags().String(config.ParamProvider, "kubernetes", "Provider")
+}
+
+func executeListAccountsCmd(cmd *cobra.Command, args []string) error {
+	account, err := cmd.Flags().GetString(ParameterAccount)
 	if err != nil {
 		return err
 	}
-	envProvider, err := cmd.Flags().GetString(ParameterProvider)
+	provider, err := cmd.Flags().GetString(ParameterProvider)
+	if err != nil {
+		return err
+	}
+	ctx := context.TODO()
+	logger := utils.GetLogger()
+	client, err := helpers.MakeDeploymentClient(logger, ctx, cmd)
 	if err != nil {
 		return err
 	}
 
 	r, err := client.GetApplications(ctx, &deng.GetAppRequest{
-		Env: &deng.Environment{Provider: envProvider, Account: envName},
+		Env: &deng.Environment{Provider: provider, Account: account},
 	})
 	if err != nil {
 		return err

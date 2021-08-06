@@ -2,14 +2,13 @@ package cmd
 
 import (
 	"context"
-	"flag"
-	"fmt"
-	"github.com/armory/armory-cli/internal/app"
 	"github.com/armory/armory-cli/internal/config"
 	"github.com/armory/armory-cli/internal/deng"
 	"github.com/armory/armory-cli/internal/deploy"
+	"github.com/armory/armory-cli/internal/helpers"
 	"github.com/armory/armory-cli/internal/rollout"
 	"github.com/armory/armory-cli/internal/status"
+	"github.com/armory/armory-cli/internal/utils"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"
@@ -21,12 +20,20 @@ const (
 	ParamVerbose  = "verbose"
 )
 
+var verboseFlag bool
+
+type globalCommandConfig struct {
+	VerboseMode bool
+}
+
+var GlobalCommandConfig = &globalCommandConfig{}
+
 func MainCommand() *cobra.Command {
 	var rootCommand = &cobra.Command{
 		Use:   deployCliName,
 		Short: "Trigger, monitor, and diagnose your deployments",
 	}
-	rootCommand.PersistentFlags().BoolP(ParamVerbose, "v", false, "show more details")
+	rootCommand.PersistentFlags().BoolVarP(&GlobalCommandConfig.VerboseMode, ParamVerbose, "v", false, "show more details")
 	rootCommand.PersistentFlags().StringP(config.ParamContext, "C", "default", "context")
 	rootCommand.PersistentFlags().String(config.ParamEndpoint, "deploy.cloud.armory.io:443", "deploy engine endpoint")
 	rootCommand.PersistentFlags().Bool(config.ParamInsecure, false, "do not verify server certificate")
@@ -39,33 +46,11 @@ func MainCommand() *cobra.Command {
 	rootCommand.PersistentFlags().String(config.ParamServerName, "", "override server name")
 	rootCommand.PersistentFlags().String(config.ParamToken, "", "authentication token")
 	rootCommand.PersistentFlags().Bool(config.ParamAnonymously, false, "connect anonymously. This will likely fail in a non test environment.")
-	rootCommand.AddCommand(appCommand(), deployCommand(), configCommand(), tokenCommand())
+	rootCommand.AddCommand(deployCommand(), configCommand(), tokenCommand())
 	rootCommand.SilenceUsage = true
 	return rootCommand
 }
 
-func appCommand() *cobra.Command {
-	appCmd := &cobra.Command{
-		Use:   "app",
-		Short: "Get and manage applications",
-	}
-	appCmd.AddCommand(appGetCommand())
-	return appCmd
-}
-
-func appGetCommand() *cobra.Command {
-	listCmd := &cobra.Command{
-		Use:   "get",
-		Short: "Get application information",
-		Long:  `Retrieve known applications. If an application is provided, prints information on deployments.`,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return executeCancelable(cmd, app.Execute, args)
-		},
-	}
-	listCmd.Flags().String(app.ParameterProvider, "kubernetes", "provider")
-	listCmd.Flags().String(app.ParameterAccount, "", "account name")
-	return listCmd
-}
 
 func deployCommand() *cobra.Command {
 	depCmd := &cobra.Command{
@@ -165,92 +150,28 @@ func restartCommand() *cobra.Command {
 	return getCmd
 }
 
-func configCommand() *cobra.Command {
-	cfgCmd := &cobra.Command{
-		Use:   "config",
-		Short: fmt.Sprintf("View and get %s configuration", deployCliName),
-	}
-	viewCmd := &cobra.Command{
-		Use:   "view",
-		Short: fmt.Sprintf("View %s configuration", deployCliName),
-		Run: func(cmd *cobra.Command, args []string) {
-			config.View()
-		},
-	}
-	cfgCmd.AddCommand(viewCmd, addConfigCommand(), accountsCommand())
-	return cfgCmd
-}
-
-func addConfigCommand() *cobra.Command {
-	addCmd := &cobra.Command{
-		Use:   "add",
-		Short: "Add a context to the configuration",
-		Run: func(cmd *cobra.Command, args []string) {
-			if err := config.Add(cmd); err != nil {
-				fmt.Printf("Unable to add context: %s\n", err.Error())
-			}
-		},
-	}
-	addCmd.Flags().String(config.ParamAddClientId, "", "Armory cloud client-id")
-	addCmd.Flags().String(config.ParamAddSecret, "", "Armory cloud secret")
-	addCmd.Flags().String(config.ParamAddAudience, "", "Override Armory Cloud audience")
-	addCmd.Flags().String(config.ParamAddTokenIssuerUrl, "", "Override Armory Cloud token issuer endpoint")
-
-	_ = addCmd.MarkFlagRequired(config.ParamAddSecret)
-	_ = addCmd.MarkFlagRequired(config.ParamAddClientId)
-	return addCmd
-}
-
 func tokenCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "token",
 		Short: "Obtain a token from configured provider",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			log := setupLog(cmd)
+			log := utils.GetLogger()
 			return config.GetToken(context.TODO(), log, cmd)
 		},
 	}
 }
 
 func accountsCommand() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "accounts",
-		Short: "List available accounts",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return executeCancelable(cmd, config.GetAccounts, args)
-		},
-	}
-	cmd.Flags().String(config.ParamProvider, "kubernetes", "Provider")
+
+
 	return cmd
-}
-
-func setupLog(cmd *cobra.Command) *logrus.Logger {
-	verbose, _ := cmd.Flags().GetBool(ParamVerbose)
-	logger := logrus.New()
-	lvl := logrus.FatalLevel
-	if verbose {
-		lvl = logrus.DebugLevel
-	}
-	logger.SetLevel(lvl)
-	logger.SetFormatter(&logrus.TextFormatter{})
-	_ = flag.Set("logtostderr", "true")
-	return logger
-}
-
-func makeDeploymentClient(log *logrus.Logger, ctx context.Context, cmd *cobra.Command) (deng.DeploymentServiceClient, error) {
-	conn, err := config.GetClientConnection(log, cmd)
-	if err != nil {
-		return nil, err
-	}
-	conn.Connect(ctx)
-	return deng.NewDeploymentServiceClient(conn.GetConn()), nil
 }
 
 type executor func(ctx context.Context, log *logrus.Logger, cmd *cobra.Command, client deng.DeploymentServiceClient, args []string) error
 
 func executeCancelable(cmd *cobra.Command, exe executor, args []string) error {
 	ctx, cancel := context.WithCancel(context.TODO())
-	logger := setupLog(cmd)
+	logger := utils.GetLogger()
 
 	signalCh := make(chan os.Signal, 1)
 	signal.Notify(signalCh, os.Interrupt)
@@ -262,7 +183,7 @@ func executeCancelable(cmd *cobra.Command, exe executor, args []string) error {
 		cancel()
 	}()
 
-	dc, err := makeDeploymentClient(logger, ctx, cmd)
+	dc, err := helpers.MakeDeploymentClient(logger, ctx, cmd)
 	if err != nil {
 		return err
 	}
