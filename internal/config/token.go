@@ -5,12 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"github.com/armory-io/go-cloud-service/pkg/token"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"strings"
 )
 
-func GetToken(ctx context.Context, log *logrus.Logger, cmd *cobra.Command) error {
+func GetToken(ctx context.Context, cmd *cobra.Command) error {
 	ct, err := getContext(cmd)
 	if err != nil {
 		return err
@@ -24,7 +24,7 @@ func GetToken(ctx context.Context, log *logrus.Logger, cmd *cobra.Command) error
 	} else {
 		identity = &ct.Identity
 	}
-	cred := token.GetRPCCredentials(*identity, ctx, log)
+	cred := token.GetRPCCredentials(*identity, ctx, log.StandardLogger())
 	m, err := cred.GetRequestMetadata(ctx, "")
 	if err != nil {
 		return err

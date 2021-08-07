@@ -7,7 +7,7 @@ import (
 	"github.com/armory-io/go-cloud-service/pkg/token"
 	"github.com/juju/ansiterm"
 	"github.com/mitchellh/mapstructure"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -140,8 +140,8 @@ type Context struct {
 	Connection client.Service `yaml:"connection"`
 }
 
-func (c *Context) NewConnection(log *logrus.Logger) client.Connection {
-	return client.New(c.Connection, &c.Identity, log)
+func (c *Context) NewConnection() client.Connection {
+	return client.New(c.Connection, &c.Identity, log.StandardLogger())
 }
 
 func getHome() string {

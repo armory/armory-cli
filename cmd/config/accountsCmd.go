@@ -6,7 +6,6 @@ import (
 	"github.com/armory/armory-cli/internal/config"
 	"github.com/armory/armory-cli/internal/deng"
 	"github.com/armory/armory-cli/internal/helpers"
-	"github.com/armory/armory-cli/internal/utils"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/juju/ansiterm"
 	"github.com/spf13/cobra"
@@ -27,6 +26,7 @@ var listAccountsCmd = &cobra.Command{
 
 func init() {
 	listAccountsCmd.Flags().String(config.ParamProvider, "kubernetes", "Provider")
+	configCmd.AddCommand(listAccountsCmd)
 }
 
 func executeListAccountsCmd(cmd *cobra.Command, args []string) error {
@@ -39,8 +39,7 @@ func executeListAccountsCmd(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	ctx := context.TODO()
-	logger := utils.GetLogger()
-	client, err := helpers.MakeDeploymentClient(logger, ctx, cmd)
+	client, err := helpers.MakeDeploymentClient(ctx, cmd)
 	if err != nil {
 		return err
 	}

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/armory/armory-cli/internal/deng"
 	"github.com/armory/armory-cli/internal/helpers"
-	"github.com/armory/armory-cli/internal/utils"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/juju/ansiterm"
 	"github.com/spf13/cobra"
@@ -28,9 +27,8 @@ func init() {
 
 func execute(cmd *cobra.Command, args []string) error {
 	ctx := context.TODO()
-	logger := utils.GetLogger()
 
-	client, err := helpers.MakeDeploymentClient(logger, ctx, cmd)
+	client, err := helpers.MakeDeploymentClient(ctx, cmd)
 	if err != nil {
 		return err
 	}

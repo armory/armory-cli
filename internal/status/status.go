@@ -8,7 +8,7 @@ import (
 	"github.com/armory/armory-cli/internal/helpers"
 	"github.com/golang/protobuf/ptypes/any"
 	"github.com/juju/ansiterm"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"io"
 	"os"
@@ -20,7 +20,7 @@ const (
 	ParameterShowEvents = "show-events"
 )
 
-func Execute(ctx context.Context, log *logrus.Logger, cmd *cobra.Command, client deng.DeploymentServiceClient, args []string) error {
+func Execute(ctx context.Context, cmd *cobra.Command, client deng.DeploymentServiceClient, args []string) error {
 	if len(args) == 0 {
 		return errors.New("please provide deployment ID")
 	}
@@ -36,10 +36,10 @@ func Execute(ctx context.Context, log *logrus.Logger, cmd *cobra.Command, client
 	}
 
 	depId := args[0]
-	return ShowStatus(ctx, log, depId, client, watch, showEvents)
+	return ShowStatus(ctx, depId, client, watch, showEvents)
 }
 
-func ShowStatus(ctx context.Context, log *logrus.Logger, deploymentId string, client deng.DeploymentServiceClient, watch, showEvents bool) error {
+func ShowStatus(ctx context.Context, deploymentId string, client deng.DeploymentServiceClient, watch, showEvents bool) error {
 	// Get the status
 	// Prepare the request
 	req := &deng.GetStatusRequest{

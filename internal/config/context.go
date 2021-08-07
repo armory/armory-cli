@@ -5,7 +5,7 @@ import (
 	"github.com/armory-io/go-cloud-service/pkg/client"
 	tls2 "github.com/armory-io/go-cloud-service/pkg/tls"
 	"github.com/armory-io/go-cloud-service/pkg/token"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -46,15 +46,15 @@ func getContext(cmd *cobra.Command) (*Context, error) {
 	return nil, nil
 }
 
-func GetClientConnection(log *logrus.Logger, cmd *cobra.Command) (*client.Connection, error) {
+func GetClientConnection(cmd *cobra.Command) (*client.Connection, error) {
 	ctx, err := getContext(cmd)
 	if err != nil {
 		return nil, err
 	}
 	if ctx == nil {
-		return cliClientOptions(log, cmd)
+		return cliClientOptions(cmd)
 	}
-	conn := ctx.NewConnection(log)
+	conn := ctx.NewConnection()
 	return &conn, nil
 }
 
@@ -104,12 +104,12 @@ func serviceIdentityFromCliOptions(cmd *cobra.Command) (*client.Service, *token.
 	return &svc, &identity, nil
 }
 
-func cliClientOptions(log *logrus.Logger, cmd *cobra.Command) (*client.Connection, error) {
+func cliClientOptions(cmd *cobra.Command) (*client.Connection, error) {
 	svc, identity, err := serviceIdentityFromCliOptions(cmd)
 	if err != nil {
 		return nil, err
 	}
-	conn := client.New(*svc, identity, log)
+	conn := client.New(*svc, identity, log.StandardLogger())
 	return &conn, nil
 }
 

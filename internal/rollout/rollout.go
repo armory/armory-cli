@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/armory/armory-cli/internal/deng"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 )
@@ -15,15 +14,15 @@ const (
 	ParamType = "type"
 )
 
-func Resume(ctx context.Context, log *logrus.Logger, cmd *cobra.Command, client deng.DeploymentServiceClient, args []string) error {
+func Resume(ctx context.Context, cmd *cobra.Command, client deng.DeploymentServiceClient, args []string) error {
 	return performRolloutOperation(ctx, cmd, args, client.Resume)
 }
 
-func Restart(ctx context.Context, log *logrus.Logger, cmd *cobra.Command, client deng.DeploymentServiceClient, args []string) error {
+func Restart(ctx context.Context, cmd *cobra.Command, client deng.DeploymentServiceClient, args []string) error {
 	return performRolloutOperation(ctx, cmd, args, client.Restart)
 }
 
-func Abort(ctx context.Context, log *logrus.Logger, cmd *cobra.Command, client deng.DeploymentServiceClient, args []string) error {
+func Abort(ctx context.Context, cmd *cobra.Command, client deng.DeploymentServiceClient, args []string) error {
 	return performRolloutOperation(ctx, cmd, args, client.Abort)
 }
 

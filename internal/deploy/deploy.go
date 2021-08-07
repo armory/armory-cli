@@ -4,13 +4,13 @@ import (
 	"context"
 	"github.com/armory/armory-cli/internal/deng"
 	"github.com/armory/armory-cli/internal/status"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"
 )
 
-func Execute(ctx context.Context, log *logrus.Logger, cmd *cobra.Command, client deng.DeploymentServiceClient, args []string) error {
-	p := newParser(cmd.Flags(), args, log)
+func Execute(ctx context.Context, cmd *cobra.Command, client deng.DeploymentServiceClient, args []string) error {
+	p := newParser(cmd.Flags(), args, log.StandardLogger())
 	dep, err := p.parse()
 	if err != nil {
 		return err
@@ -26,7 +26,7 @@ func Execute(ctx context.Context, log *logrus.Logger, cmd *cobra.Command, client
 	status.PrintStatus(os.Stdout, desc)
 	if w {
 		// Show a watch on status
-		return status.ShowStatus(ctx, log, desc.Id, client, w, false)
+		return status.ShowStatus(ctx, desc.Id, client, w, false)
 	}
 	return nil
 }
