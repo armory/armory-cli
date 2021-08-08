@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/armory/armory-cli/internal/deng"
+	"github.com/armory/armory-cli/internal/deng/protobuff"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 )
@@ -14,19 +14,19 @@ const (
 	ParamType = "type"
 )
 
-func Resume(ctx context.Context, cmd *cobra.Command, client deng.DeploymentServiceClient, args []string) error {
+func Resume(ctx context.Context, cmd *cobra.Command, client protobuff.DeploymentServiceClient, args []string) error {
 	return performRolloutOperation(ctx, cmd, args, client.Resume)
 }
 
-func Restart(ctx context.Context, cmd *cobra.Command, client deng.DeploymentServiceClient, args []string) error {
+func Restart(ctx context.Context, cmd *cobra.Command, client protobuff.DeploymentServiceClient, args []string) error {
 	return performRolloutOperation(ctx, cmd, args, client.Restart)
 }
 
-func Abort(ctx context.Context, cmd *cobra.Command, client deng.DeploymentServiceClient, args []string) error {
+func Abort(ctx context.Context, cmd *cobra.Command, client protobuff.DeploymentServiceClient, args []string) error {
 	return performRolloutOperation(ctx, cmd, args, client.Abort)
 }
 
-func performRolloutOperation(ctx context.Context, cmd *cobra.Command, args []string, call func(ctx context.Context, in *deng.RolloutRequest, opts ...grpc.CallOption) (*deng.RolloutResponse, error)) error {
+func performRolloutOperation(ctx context.Context, cmd *cobra.Command, args []string, call func(ctx context.Context, in *protobuff.RolloutRequest, opts ...grpc.CallOption) (*protobuff.RolloutResponse, error)) error {
 	if len(args) == 0 {
 		return errors.New("please provide deployment ID")
 	}
@@ -41,12 +41,12 @@ func performRolloutOperation(ctx context.Context, cmd *cobra.Command, args []str
 		return err
 	}
 
-	var req *deng.RolloutRequest
+	var req *protobuff.RolloutRequest
 	depId := args[0]
 	if n == "" {
-		req = &deng.RolloutRequest{All: true, DeploymentId: depId}
+		req = &protobuff.RolloutRequest{All: true, DeploymentId: depId}
 	} else {
-		req = &deng.RolloutRequest{Name: n, Type: t, DeploymentId: depId}
+		req = &protobuff.RolloutRequest{Name: n, Type: t, DeploymentId: depId}
 	}
 
 	res, err := call(ctx, req)

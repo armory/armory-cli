@@ -2,14 +2,14 @@ package deploy
 
 import (
 	"context"
-	"github.com/armory/armory-cli/internal/deng"
+	"github.com/armory/armory-cli/internal/deng/protobuff"
 	"github.com/armory/armory-cli/internal/status"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"
 )
 
-func Execute(ctx context.Context, cmd *cobra.Command, client deng.DeploymentServiceClient, args []string) error {
+func Execute(ctx context.Context, cmd *cobra.Command, client protobuff.DeploymentServiceClient, args []string) error {
 	p := newParser(cmd.Flags(), args, log.StandardLogger())
 	dep, err := p.parse()
 	if err != nil {

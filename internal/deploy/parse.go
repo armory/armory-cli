@@ -2,7 +2,7 @@ package deploy
 
 import (
 	"fmt"
-	"github.com/armory/armory-cli/internal/deng"
+	"github.com/armory/armory-cli/internal/deng/protobuff"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
 )
@@ -25,18 +25,18 @@ const (
 )
 
 func newParser(fs *pflag.FlagSet, args []string, log *logrus.Logger) *parser {
-	return &parser{fs: fs, args: args, log: log, dep: &deng.Deployment{}}
+	return &parser{fs: fs, args: args, log: log, dep: &protobuff.Deployment{}}
 }
 
 type parser struct {
 	fs       *pflag.FlagSet
 	args     []string
-	dep      *deng.Deployment
+	dep      *protobuff.Deployment
 	log      *logrus.Logger
 	versions map[string]string
 }
 
-func (p *parser) parse() (*deng.Deployment, error) {
+func (p *parser) parse() (*protobuff.Deployment, error) {
 	a, err := p.fs.GetString(ParameterApplication)
 	if err != nil {
 		return nil, err
@@ -49,7 +49,7 @@ func (p *parser) parse() (*deng.Deployment, error) {
 	}
 
 	switch p.dep.Environment.Provider {
-	case deng.KubernetesProvider:
+	case protobuff.KubernetesProvider:
 		// Parse artifacts now that we know the provider
 		if err := p.parseKubernetesArtifacts(); err != nil {
 			return nil, err
@@ -69,7 +69,7 @@ func (p *parser) parseEnvironment() error {
 		return err
 	}
 	switch t {
-	case deng.KubernetesProvider:
+	case protobuff.KubernetesProvider:
 		break
 	default:
 		return fmt.Errorf("unknown environment provider %s", t)
@@ -79,17 +79,17 @@ func (p *parser) parseEnvironment() error {
 	if err != nil {
 		return err
 	}
-	p.dep.Environment = &deng.Environment{
+	p.dep.Environment = &protobuff.Environment{
 		Provider: t,
 		Account:  n,
 	}
-	if t == deng.KubernetesProvider {
+	if t == protobuff.KubernetesProvider {
 		ns, err := p.fs.GetString(ParameterEnvironmentNamespace)
 		if err != nil {
 			return err
 		}
-		p.dep.Environment.Qualifier = &deng.Environment_Kubernetes{
-			Kubernetes: &deng.KubernetesQualifier{
+		p.dep.Environment.Qualifier = &protobuff.Environment_Kubernetes{
+			Kubernetes: &protobuff.KubernetesQualifier{
 				Namespace: ns,
 			},
 		}
@@ -97,6 +97,6 @@ func (p *parser) parseEnvironment() error {
 	return nil
 }
 
-func (p *parser) parseVia() (*deng.Via, error) {
+func (p *parser) parseVia() (*protobuff.Via, error) {
 	return nil, nil
 }

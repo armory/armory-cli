@@ -2,7 +2,7 @@ package helpers
 
 import (
 	"fmt"
-	"github.com/armory/armory-cli/internal/deng"
+	"github.com/armory/armory-cli/internal/deng/protobuff"
 	"io"
 	"os"
 	"strconv"
@@ -44,25 +44,25 @@ func AnsiFormat(s string, codes ...int) string {
 	return fmt.Sprintf("%s[%sm%s%s[%dm", escape, sequence, s, escape, NoFormat)
 }
 
-func Status(status deng.Status) string {
+func Status(status protobuff.Status) string {
 	switch status {
-	case deng.Status_SUCCEEDED:
+	case protobuff.Status_SUCCEEDED:
 		return AnsiFormat("Success", FgGreen)
-	case deng.Status_PENDING:
+	case protobuff.Status_PENDING:
 		return AnsiFormat("Pending", FgBlue)
-	case deng.Status_RESOLVED:
+	case protobuff.Status_RESOLVED:
 		return AnsiFormat("Resolved", FgCyan)
-	case deng.Status_FAILED:
+	case protobuff.Status_FAILED:
 		return AnsiFormat("Failed", FgRed)
-	case deng.Status_FAILED_CLEANING:
+	case protobuff.Status_FAILED_CLEANING:
 		return AnsiFormat("Failed, cleaning", FgRed)
-	case deng.Status_ABORTED:
+	case protobuff.Status_ABORTED:
 		return AnsiFormat("Aborted", FgRed)
-	case deng.Status_PAUSED:
+	case protobuff.Status_PAUSED:
 		return AnsiFormat("Paused", FgYellow)
-	case deng.Status_QUEUED:
+	case protobuff.Status_QUEUED:
 		return AnsiFormat("Queued", FgCyan)
-	case deng.Status_SUCCEEDED_CLEANING:
+	case protobuff.Status_SUCCEEDED_CLEANING:
 		return AnsiFormat("Success, cleaning", FgGreen)
 	}
 	return status.String()
