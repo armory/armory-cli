@@ -1,4 +1,4 @@
-package appCmd
+package applicationCmd
 
 import (
 	"github.com/spf13/cobra"
@@ -10,10 +10,10 @@ const (
 )
 
 var BaseCmd = &cobra.Command{
-	Use:   "app",
-	Short: "Get and manage applications",
+	Use:   "application",
+	Short: "Manage Armory Deployment applications",
 }
 
 func init() {
-	BaseCmd.AddCommand(listApplicationsCommand)
+	BaseCmd.AddCommand(getAllApplicationsCommand)
 }

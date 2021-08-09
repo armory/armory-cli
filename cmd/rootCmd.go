@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"flag"
-	"github.com/armory/armory-cli/cmd/appCmd"
-	"github.com/armory/armory-cli/cmd/configCmd"
+	"github.com/armory/armory-cli/cmd/applicationCmd"
+	"github.com/armory/armory-cli/cmd/accountCmd"
 	"github.com/armory/armory-cli/cmd/deployCmd"
 	"github.com/armory/armory-cli/internal/config"
 	log "github.com/sirupsen/logrus"
@@ -30,8 +30,8 @@ func Execute() {
 
 func init() {
 	// Add base commands
-	rootCmd.AddCommand(appCmd.BaseCmd)
-	rootCmd.AddCommand(configCmd.BaseCmd)
+	rootCmd.AddCommand(applicationCmd.BaseCmd)
+	rootCmd.AddCommand(accountCmd.BaseCmd)
 	rootCmd.AddCommand(deployCmd.BaseCmd)
 
 	rootCmd.PersistentFlags().BoolVarP(&verboseFlag, ParamVerbose, "v", false, "show more details")

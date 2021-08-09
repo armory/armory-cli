@@ -4,13 +4,12 @@ import (
 	"context"
 	"github.com/armory/armory-cli/internal/deng/protobuff"
 	"github.com/armory/armory-cli/internal/status"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"
 )
 
 func Execute(ctx context.Context, cmd *cobra.Command, client protobuff.DeploymentServiceClient, args []string) error {
-	p := newParser(cmd.Flags(), args, log.StandardLogger())
+	p := newParser(cmd.Flags(), args)
 	dep, err := p.parse()
 	if err != nil {
 		return err

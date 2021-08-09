@@ -3,7 +3,6 @@ package deploy
 import (
 	"fmt"
 	"github.com/armory/armory-cli/internal/deng/protobuff"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
 )
 
@@ -24,15 +23,14 @@ const (
 	ParameterStrategySteps = "canary-step"
 )
 
-func newParser(fs *pflag.FlagSet, args []string, log *logrus.Logger) *parser {
-	return &parser{fs: fs, args: args, log: log, dep: &protobuff.Deployment{}}
+func NewParser(fs *pflag.FlagSet, args []string) *parser {
+	return &parser{fs: fs, args: args, dep: &protobuff.Deployment{}}
 }
 
 type parser struct {
 	fs       *pflag.FlagSet
 	args     []string
 	dep      *protobuff.Deployment
-	log      *logrus.Logger
 	versions map[string]string
 }
 
