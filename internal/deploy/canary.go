@@ -91,10 +91,7 @@ func ratioParser(str string) (*protobuff.Canary_CanaryStep, error) {
 var stepParsers = []stepParser{pauseParser, waitParser, ratioParser}
 
 func (p *parser) parseCanarySteps() ([]*protobuff.Canary_CanaryStep, error) {
-	defs, err := p.fs.GetStringArray(ParameterStrategySteps)
-	if err != nil {
-		return nil, err
-	}
+	defs := p.deploymentConfiguration.StrategySteps
 	r := make([]*protobuff.Canary_CanaryStep, 0)
 	for _, s := range defs {
 		for _, sp := range stepParsers {

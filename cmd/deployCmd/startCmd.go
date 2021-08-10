@@ -2,8 +2,10 @@ package deployCmd
 
 import (
 	"github.com/armory/armory-cli/internal/deng"
+	"github.com/armory/armory-cli/internal/status"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+	"os"
 )
 
 // For now we only map to a single artifact
@@ -41,15 +43,15 @@ func executeStartCmd(cmd *cobra.Command, args []string) error {
 	}
 
 	var deployEngine = deng.GetDeployEngineInstance()
-	deploymentId, initialState, err := deployEngine.StartDeployment(deploymentConfiguration)
+	_, deploymentDescriptor, err := deployEngine.StartKubernetesDeployment(deploymentConfiguration)
 	if err != nil {
 		return err
 	}
 
+	status.PrintStatus(os.Stdout, deploymentDescriptor)
 	if deploymentConfiguration.Wait {
-
+		return status.ShowStatus(ctx, log, desc.Id, client, w, false)
 	}
-
 	return nil
 }
 

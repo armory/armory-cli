@@ -25,15 +25,9 @@ func (p *parser) parseKubernetesArtifacts() error {
 		return err
 	}
 
-	ku, err := p.fs.GetBool(ParameterKustomize)
-	if err != nil {
-		return err
-	}
+	kustomize := p.deploymentConfiguration.Kustomize
 
-	lcl, err := p.fs.GetBool(ParameterLocal)
-	if err != nil {
-		return err
-	}
+	local := p.deploymentConfiguration.Local
 
 	wd, err := os.Getwd()
 	if err != nil {
@@ -46,7 +40,7 @@ func (p *parser) parseKubernetesArtifacts() error {
 
 	// Check in arguments if there are any Kubernetes manifests
 	for _, a := range p.args {
-		if err := p.parseArgAsKubernetesManifest(a, ku, wd, via, lcl); err != nil {
+		if err := p.parseArgAsKubernetesManifest(a, kustomize, wd, via, local); err != nil {
 			return err
 		}
 	}
